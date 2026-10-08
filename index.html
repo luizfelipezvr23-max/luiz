@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Guarapuava - Terra das Araucárias e Capital da Cevada</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        },
+                        water: {
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                        },
+                        pine: '#1e3a29'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hero-bg {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(20, 83, 45, 0.85) 100%),
+                        url('https://images.unsplash.com/photo-1511497584788-8767611136f6?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat fixed;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .glass-dark {
+            background: rgba(20, 83, 45, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #16a34a;
+            border-radius: 10px;
+        }
+        #map {
+            height: 520px;
+            z-index: 10;
+        }
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            padding: 4px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- Header Navbar -->
+    <header id="main-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <a href="#home" class="flex items-center gap-3 group">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-700 to-brand-500 flex items-center justify-center text-white shadow-md shadow-brand-500/20 group-hover:scale-105 transition-transform">
+                        <i class="fa-solid font-bold text-xl fa-tree"></i>
+                    </div>
+                    <div>
+                        <span class="block text-xl font-bold font-serif text-slate-900 tracking-tight leading-none">Explore</span>
+                        <span class="block text-xs font-semibold text-brand-600 tracking-widest uppercase">Guarapuava</span>
+                    </div>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden lg:flex items-center gap-8">
+                    <a href="#home" class="nav-link text-sm font-medium text-slate-700 hover:text-brand-600 transition-colors">Início</a>
+                    <a href="#sobre" class="nav-link text-sm font-medium text-slate-700 hover:text-brand-600 transition-colors">A Cidade</a>
+                    <a href="#pontos-turisticos" class="nav-link text-sm font-medium text-slate-700 hover:text-brand-600 transition-colors">Pontos Turísticos</a>
+                    <a href="#gastronomia" class="nav-link text-sm font-medium text-slate-700 hover:text-brand-600 transition-colors">Gastronomia</a>
+                    <a href="#eventos" class="nav-link text-sm font-medium text-slate-700 hover:text-brand-600 transition-colors">Eventos</a>
+                    <a href="#galeria" class="nav-link text-sm font-medium text-slate-700 hover:text-brand-600 transition-colors">Galeria</a>
+                    <a href="#mapa" class="nav-link text-sm font-medium text-slate-700 hover:text-brand-600 transition-colors">Mapa</a>
+                    <a href="#contato" class="nav-link text-sm font-medium text-slate-700 hover:text-brand-600 transition-colors">Contato</a>
+                </nav>
+
+                <!-- Action Button & Itinerary Drawer Trigger -->
+                <div class="hidden sm:flex items-center gap-3">
+                    <button id="open-itinerary-btn" onclick="toggleItineraryModal()" class="relative flex items-center gap-2 px-4 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-all">
+                        <i class="fa-solid fa-bookmark text-brand-600"></i>
+                        <span>Meu Roteiro</span>
+                        <span id="itinerary-count" class="bg-brand-600 text-white rounded-full text-[10px] w-5 h-5 flex items-center justify-center font-bold">0</span>
+                    </button>
+                    <a href="#pontos-turisticos" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold shadow-md shadow-brand-600/20 hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                        <i class="fa-solid fa-compass"></i>
+                        <span>Explorar Agora</span>
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded-xl text-slate-600 hover:text-brand-600 hover:bg-slate-100 focus:outline-none">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Menu -->
+        <div id="mobile-menu" class="hidden lg:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 space-y-3">
+            <a href="#home" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">Início</a>
+            <a href="#sobre" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">A Cidade</a>
+            <a href="#pontos-turisticos" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">Pontos Turísticos</a>
+            <a href="#gastronomia" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">Gastronomia</a>
+            <a href="#eventos" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">Eventos</a>
+            <a href="#galeria" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">Galeria</a>
+            <a href="#mapa" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">Mapa de Acesso</a>
+            <a href="#contato" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-100">Contato</a>
+            
+            <div class="pt-4 flex flex-col gap-2">
+                <button onclick="toggleItineraryModal(); toggleMobileMenu();" class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-100 text-slate-800 font-medium">
+                    <i class="fa-solid fa-bookmark text-brand-600"></i>
+                    <span>Ver Meu Roteiro</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative min-h-screen pt-28 pb-16 flex items-center justify-center hero-bg text-white overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/40 to-transparent"></div>
+        
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full z-20">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Hero Left Text Content -->
+                <div class="lg:col-span-8 text-center lg:text-left space-y-6">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-medium text-emerald-300">
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>Terceiro Planalto Paranaense &bull; Altitude ~1.100m</span>
+                    </div>
+
+                    <h1 class="text-4xl sm:text-6xl lg:text-7xl font-serif font-bold tracking-tight leading-tight text-white">
+                        Descubra as Maravilhas de <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-200 to-sky-300">Guarapuava</span>
+                    </h1>
+
+                    <p class="text-lg sm:text-xl text-slate-200 max-w-2xl font-light leading-relaxed mx-auto lg:mx-0">
+                        Entre gigantescas araucárias, os mais impressionantes saltos de água do Sul do Brasil e a rica cultura da Capital da Cevada. Venha viver experiências inesquecíveis.
+                    </p>
+
+                    <!-- Hero Search & Buttons -->
+                    <div class="pt-4 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                        <a href="#pontos-turisticos" class="w-full sm:w-auto px-8 py-4 rounded-full bg-brand-600 hover:bg-brand-500 text-white font-semibold shadow-lg shadow-brand-600/30 flex items-center justify-center gap-3 transition-all hover:scale-105">
+                            <i class="fa-solid fa-compass text-lg"></i>
+                            <span>Explorar Pontos Turísticos</span>
+                        </a>
+                        <a href="#mapa" class="w-full sm:w-auto px-8 py-4 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white font-semibold flex items-center justify-center gap-3 transition-all">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                            <span>Ver no Mapa</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Hero Right Widget: Weather & Highlights Card -->
+                <div class="lg:col-span-4">
+                    <div class="glass-dark rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden">
+                        <div class="absolute -top-10 -right-10 w-32 h-32 bg-brand-500/20 rounded-full blur-2xl"></div>
+
+                        <!-- Weather Info Header -->
+                        <div class="flex items-center justify-between border-b border-white/10 pb-4 mb-4">
+                            <div>
+                                <span class="text-xs uppercase tracking-wider text-slate-300">Tempo Agora</span>
+                                <h3 class="text-lg font-bold">Guarapuava, PR</h3>
+                            </div>
+                            <div class="text-right">
+                                <span id="weather-temp" class="text-3xl font-bold font-serif">19°C</span>
+                                <span id="weather-desc" class="block text-xs text-emerald-300">Parcialmente Nublado</span>
+                            </div>
+                        </div>
+
+                        <!-- Highlights List -->
+                        <p class="text-xs font-semibold text-slate-300 uppercase tracking-widest mb-3">Destaques da Região</p>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 bg-white/5 p-3 rounded-2xl hover:bg-white/10 transition">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-300">
+                                    <i class="fa-solid fa-water"></i>
+                                </div>
+                                <div class="text-xs">
+                                    <h4 class="font-bold text-white">Salto São Francisco</h4>
+                                    <p class="text-slate-300">Maior queda d'água do Sul do Brasil (196m)</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3 bg-white/5 p-3 rounded-2xl hover:bg-white/10 transition">
+                                <div class="w-10 h-10 rounded-xl bg-sky-500/20 flex items-center justify-center text-sky-300">
+                                    <i class="fa-solid fa-beer-mug-empty"></i>
+                                </div>
+                                <div class="text-xs">
+                                    <h4 class="font-bold text-white">Capital do Malte</h4>
+                                    <p class="text-slate-300">Rota das Cervejarias Artesanais do Paraná</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-3 bg-white/5 p-3 rounded-2xl hover:bg-white/10 transition">
+                                <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-300">
+                                    <i class="fa-solid fa-tree"></i>
+                                </div>
+                                <div class="text-xs">
+                                    <h4 class="font-bold text-white">Natureza e Ecoturismo</h4>
+                                    <p class="text-slate-300">Bosques preservados e araucárias centenárias</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Presentation Section (Sobre Guarapuava) -->
+    <section id="sobre" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                
+                <!-- Image Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <img src="https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=800&q=80" alt="Araucárias em Guarapuava" class="rounded-3xl shadow-lg object-cover h-64 w-full transform hover:scale-102 transition duration-300">
+                    <img src="https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=800&q=80" alt="Salto São Francisco" class="rounded-3xl shadow-lg object-cover h-64 w-full translate-y-6 transform hover:scale-102 transition duration-300">
+                </div>
+
+                <!-- Content -->
+                <div class="space-y-6">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-50 text-brand-700 text-xs font-semibold">
+                        <i class="fa-solid fa-heart"></i>
+                        <span>Boas-vindas a Guarapuava</span>
+                    </div>
+
+                    <h2 class="text-3xl sm:text-4xl font-serif font-bold text-slate-900 leading-tight">
+                        História, Natureza Exuberante e Tradição no Coração do Paraná
+                    </h2>
+
+                    <p class="text-slate-600 leading-relaxed font-light">
+                        Guarapuava é o maior município em extensão territorial do Paraná e um dos mais acolhedores do Estado. Com clima temperado agradável e paisagens formadas por campos abertos e florestas de Araucárias, a cidade une o charme histórico colonial às facilidades de um polo dinâmico.
+                    </p>
+
+                    <!-- Quick Metrics Grid -->
+                    <div class="grid grid-cols-3 gap-4 pt-4 border-t border-slate-100">
+                        <div>
+                            <span class="block text-2xl font-bold font-serif text-brand-700">+190 mil</span>
+                            <span class="text-xs text-slate-500 font-medium">Habitantes</span>
+                        </div>
+                        <div>
+                            <span class="block text-2xl font-bold font-serif text-brand-700">196 m</span>
+                            <span class="text-xs text-slate-500 font-medium">Maior Salto (São Francisco)</span>
+                        </div>
+                        <div>
+                            <span class="block text-2xl font-bold font-serif text-brand-700">1.120 m</span>
+                            <span class="text-xs text-slate-500 font-medium">Altitude Média</span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Pontos Turísticos Section -->
+    <section id="pontos-turisticos" class="py-20 bg-slate-100/70">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <!-- Section Header -->
+            <div class="text-center max-w-3xl mx-auto space-y-4 mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-3 py-1 rounded-full">Destinos Imperdíveis</span>
+                <h2 class="text-3xl sm:text-4xl font-serif font-bold text-slate-900">Explore os Principais Pontos Turísticos</h2>
+                <p class="text-slate-600">Descubra parques urbanos, cachoeiras imponentes, centros de cultura e paisagens de tirar o fôlego.</p>
+            </div>
+
+            <!-- Filter Buttons -->
+            <div class="flex flex-wrap justify-center gap-2 mb-10">
+                <button onclick="filterSpots('todos')" class="spot-filter-btn active px-5 py-2 rounded-full text-xs font-semibold transition-all bg-brand-700 text-white shadow-md">
+                    Todos os Locais
+                </button>
+                <button onclick="filterSpots('natureza')" class="spot-filter-btn px-5 py-2 rounded-full text-xs font-semibold bg-white text-slate-700 hover:bg-slate-200 transition-all">
+                    Natureza & Cachoeiras
+                </button>
+                <button onclick="filterSpots('parque')" class="spot-filter-btn px-5 py-2 rounded-full text-xs font-semibold bg-white text-slate-700 hover:bg-slate-200 transition-all">
+                    Parques Urbanos
+                </button>
+                <button onclick="filterSpots('historico')" class="spot-filter-btn px-5 py-2 rounded-full text-xs font-semibold bg-white text-slate-700 hover:bg-slate-200 transition-all">
+                    Histórico & Cultural
+                </button>
+            </div>
+
+            <!-- Tourist Spots Grid -->
+            <div id="spots-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Cards will be populated dynamically via JavaScript -->
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Interactive Map Section -->
+    <section id="mapa" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+                <div>
+                    <span class="text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-3 py-1 rounded-full">Navegação no Mapa</span>
+                    <h2 class="text-3xl font-serif font-bold text-slate-900 mt-2">Mapa Turístico de Guarapuava</h2>
+                    <p class="text-slate-600 text-sm mt-1">Clique nos marcadores para ver informações detalhadas e traçar sua rota.</p>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-500 font-medium">Legenda:</span>
+                    <span class="inline-flex items-center gap-1 text-xs text-emerald-700 font-semibold bg-emerald-50 px-2 py-1 rounded-md"><i class="fa-solid fa-location-dot"></i> Ponto de Interesse</span>
+                </div>
+            </div>
+
+            <!-- Map Container -->
+            <div class="rounded-3xl overflow-hidden shadow-xl border border-slate-200 relative">
+                <div id="map"></div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Gastronomia Section -->
+    <section id="gastronomia" class="py-20 bg-slate-900 text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#22c55e_1px,transparent_1px)] [background-size:16px_16px]"></div>
+
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto space-y-4 mb-16">
+                <span class="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-white/10 px-3 py-1 rounded-full border border-white/20">SABORES DA TERRA</span>
+                <h2 class="text-3xl sm:text-4xl font-serif font-bold">Gastronomia Regional & Capital do Malte</h2>
+                <p class="text-slate-300 font-light">Saboreie pratos típicos como a Quirera com Carne de Suíno, pratos à base de pinhão e descubra as premiadas cervejarias artesanais guarapuavanas.</p>
+            </div>
+
+            <!-- Regional Dishes Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                
+                <div class="bg-slate-800/80 border border-slate-700 rounded-3xl p-6 shadow-xl hover:border-emerald-500/50 transition">
+                    <div class="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl mb-6">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-serif mb-2">Quirera com Suíno</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                        Prato tradicional tropeiro preparado com milho quebrado e costelinha de porco defumada, garantindo sabor marcante nos dias frios de inverno.
+                    </p>
+                    <span class="inline-block text-xs text-amber-400 font-semibold">Prato Patrimônio Cultural</span>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700 rounded-3xl p-6 shadow-xl hover:border-emerald-500/50 transition">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl mb-6">
+                        <i class="fa-solid fa-seedling"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-serif mb-2">Entrevero & Pratos com Pinhão</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                        A semente da araucária é estrela em receitas doces e salgadas, incluindo o famoso entrevero de carnes frito com pinhão em tacho de ferro.
+                    </p>
+                    <span class="inline-block text-xs text-emerald-400 font-semibold">Sabor Típico da Serra</span>
+                </div>
+
+                <div class="bg-slate-800/80 border border-slate-700 rounded-3xl p-6 shadow-xl hover:border-emerald-500/50 transition">
+                    <div class="w-14 h-14 rounded-2xl bg-sky-500/20 text-sky-400 flex items-center justify-center text-2xl mb-6">
+                        <i class="fa-solid fa-beer-mug-empty"></i>
+                    </div>
+                    <h3 class="text-xl font-bold font-serif mb-2">Cervejas Artesanais</h3>
+                    <p class="text-slate-300 text-sm leading-relaxed mb-4">
+                        Guarapuava é reconhecida como a Capital da Cevada e do Malte do Brasil. Visite pub-breweries premiados e provadores de cerveja.
+                    </p>
+                    <span class="inline-block text-xs text-sky-400 font-semibold">Rota das Cervejarias</span>
+                </div>
+
+            </div>
+
+            <!-- Featured Culinary Venues list -->
+            <div class="bg-slate-800/50 rounded-3xl p-8 border border-slate-700">
+                <h3 class="text-xl font-bold font-serif mb-6 text-emerald-400 flex items-center gap-2">
+                    <i class="fa-solid fa-store"></i> Onde Comer & Beber em Guarapuava
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-xs text-emerald-400 font-semibold">Cervejaria Artesanal</span>
+                        <h4 class="font-bold text-white mt-1">Cervejaria Jordana</h4>
+                        <p class="text-xs text-slate-400 mt-1">Chopps especiais & hambúrgueres artesanais no centro.</p>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-xs text-amber-400 font-semibold">Cozinha Típica</span>
+                        <h4 class="font-bold text-white mt-1">Restaurante Sabor Gaúcho</h4>
+                        <p class="text-xs text-slate-400 mt-1">Churrasco tradicional e acompanhamentos regionais.</p>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-xs text-emerald-400 font-semibold">Café & Confeitaria</span>
+                        <h4 class="font-bold text-white mt-1">Café do Lago</h4>
+                        <p class="text-xs text-slate-400 mt-1">Tortas deliciosas com vista para o Parque do Lago.</p>
+                    </div>
+                    <div class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800">
+                        <span class="text-xs text-sky-400 font-semibold">Pub & Gastropub</span>
+                        <h4 class="font-bold text-white mt-1">Metrópole Brewpub</h4>
+                        <p class="text-xs text-slate-400 mt-1">Música ao vivo, cervejas locais e porções fartas.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Eventos Section -->
+    <section id="eventos" class="py-20 bg-slate-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto space-y-4 mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-3 py-1 rounded-full">Calendário Cultural</span>
+                <h2 class="text-3xl sm:text-4xl font-serif font-bold text-slate-900">Eventos e Festivais Tradicionais</h2>
+                <p class="text-slate-600">Acompanhe a programação dos principais festivais de música, gastronomia e agropecuária da cidade.</p>
+            </div>
+
+            <!-- Events Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Event 1 -->
+                <div class="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition border border-slate-100 flex flex-col">
+                    <div class="bg-gradient-to-r from-brand-700 to-brand-600 p-6 text-white relative">
+                        <span class="inline-block px-3 py-1 rounded-full bg-white/20 text-xs font-semibold uppercase mb-2">Agosto</span>
+                        <h3 class="text-2xl font-serif font-bold">EXPOGUA</h3>
+                        <p class="text-xs text-emerald-100">Exposição Feira Agropecuária e Industrial de Guarapuava</p>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                            Uma das maiores feiras do interior do estado, reunindo grandes shows nacionais, rodeios, leilões e feira gastronômica no Parque Lacerda Werneck.
+                        </p>
+                        <div class="flex items-center gap-2 text-xs font-semibold text-brand-700">
+                            <i class="fa-solid fa-calendar-day"></i>
+                            <span>Anual em Agosto</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event 2 -->
+                <div class="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition border border-slate-100 flex flex-col">
+                    <div class="bg-gradient-to-r from-sky-700 to-water-500 p-6 text-white relative">
+                        <span class="inline-block px-3 py-1 rounded-full bg-white/20 text-xs font-semibold uppercase mb-2">Outubro</span>
+                        <h3 class="text-2xl font-serif font-bold">Festival da Cevada</h3>
+                        <p class="text-xs text-sky-100">Celebração da Cultura Cervejeira</p>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                            Festival que reúne mestres cervejeiros, estandes gastronômicos, concursos da melhor cerveja da região e atrações musicais de rock e folk.
+                        </p>
+                        <div class="flex items-center gap-2 text-xs font-semibold text-water-600">
+                            <i class="fa-solid fa-calendar-day"></i>
+                            <span>Primavera / Outubro</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Event 3 -->
+                <div class="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition border border-slate-100 flex flex-col">
+                    <div class="bg-gradient-to-r from-amber-600 to-amber-500 p-6 text-white relative">
+                        <span class="inline-block px-3 py-1 rounded-full bg-white/20 text-xs font-semibold uppercase mb-2">Maio / Junho</span>
+                        <h3 class="text-2xl font-serif font-bold">Festa do Pinhão</h3>
+                        <p class="text-xs text-amber-100">Gastronomia Regional no Inverno</p>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between">
+                        <p class="text-slate-600 text-sm leading-relaxed mb-4">
+                            Encontro tradicional que festeja a safra do pinhão com pratos típicos, apresentações nativistas de dança tradicional gaúcha e artesanato local.
+                        </p>
+                        <div class="flex items-center gap-2 text-xs font-semibold text-amber-600">
+                            <i class="fa-solid fa-calendar-day"></i>
+                            <span>Início do Inverno</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Galeria de Fotos Section -->
+    <section id="galeria" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="text-center max-w-3xl mx-auto space-y-4 mb-12">
+                <span class="text-xs font-bold uppercase tracking-widest text-brand-600 bg-brand-50 px-3 py-1 rounded-full">Registro Visual</span>
+                <h2 class="text-3xl sm:text-4xl font-serif font-bold text-slate-900">Galeria de Imagens</h2>
+                <p class="text-slate-600">Inspire-se com os cenários fotográficos das paisagens e cartões-postais da cidade.</p>
+            </div>
+
+            <!-- Gallery Filter Buttons -->
+            <div class="flex flex-wrap justify-center gap-2 mb-8">
+                <button onclick="filterGallery('todos')" class="gallery-filter-btn active px-4 py-2 rounded-full text-xs font-semibold bg-brand-700 text-white shadow">
+                    Todas as Fotos
+                </button>
+                <button onclick="filterGallery('parques')" class="gallery-filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+                    Parques
+                </button>
+                <button onclick="filterGallery('cachoeiras')" class="gallery-filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+                    Cachoeiras
+                </button>
+                <button onclick="filterGallery('patrimonio')" class="gallery-filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200">
+                    Patrimônio
+                </button>
+            </div>
+
+            <!-- Gallery Grid -->
+            <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <!-- Javascript will load gallery images -->
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Contato Section -->
+    <section id="contato" class="py-20 bg-slate-900 text-white relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                
+                <!-- Contact Info Left -->
+                <div class="lg:col-span-5 space-y-6">
+                    <span class="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-white/10 px-3 py-1 rounded-full">Atendimento ao Turista</span>
+                    <h2 class="text-3xl sm:text-4xl font-serif font-bold leading-tight">Precisa de Ajuda para Planejar sua Viagem?</h2>
+                    <p class="text-slate-300 font-light leading-relaxed">
+                        Entre em contato com a equipe do Portal Explore Guarapuava para tirar dúvidas sobre horários, rotas, hospedagens e dicas personalizadas.
+                    </p>
+
+                    <div class="space-y-4 pt-4">
+                        <div class="flex items-center gap-4 bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
+                            <div class="w-12 h-12 rounded-xl bg-brand-600/20 text-emerald-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-location-dot"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-semibold text-slate-400">Centro de Informações Turísticas</h4>
+                                <p class="text-sm font-bold">Rua XV de Novembro, Centro - Guarapuava, PR</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
+                            <div class="w-12 h-12 rounded-xl bg-sky-600/20 text-sky-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-phone"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-semibold text-slate-400">Telefone / WhatsApp</h4>
+                                <p class="text-sm font-bold">(42) 3621-3000 / (42) 99900-1234</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-4 bg-slate-800/80 p-4 rounded-2xl border border-slate-700">
+                            <div class="w-12 h-12 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-envelope"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-semibold text-slate-400">E-mail Oficial</h4>
+                                <p class="text-sm font-bold">turismo@guarapuava.pr.gov.br</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Social Networks -->
+                    <div class="pt-2">
+                        <span class="block text-xs text-slate-400 mb-3 font-semibold uppercase tracking-wider">Siga nas redes sociais</span>
+                        <div class="flex items-center gap-3">
+                            <a href="#" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-brand-600 flex items-center justify-center transition"><i class="fa-brands fa-instagram text-lg"></i></a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-brand-600 flex items-center justify-center transition"><i class="fa-brands fa-facebook-f text-lg"></i></a>
+                            <a href="#" class="w-10 h-10 rounded-full bg-slate-800 hover:bg-brand-600 flex items-center justify-center transition"><i class="fa-brands fa-youtube text-lg"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Form Right -->
+                <div class="lg:col-span-7">
+                    <div class="bg-slate-800/90 rounded-3xl p-8 border border-slate-700 shadow-2xl">
+                        <h3 class="text-2xl font-serif font-bold mb-6 text-white">Envie uma Mensagem</h3>
+                        
+                        <form id="contact-form" onsubmit="handleContactSubmit(event)" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-2">Nome Completo</label>
+                                    <input type="text" required placeholder="Seu nome" class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-2">E-mail</label>
+                                    <input type="email" required placeholder="seu@email.com" class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 text-sm">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-2">Telefone</label>
+                                    <input type="tel" placeholder="(00) 00000-0000" class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-300 mb-2">Assunto</label>
+                                    <select class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white focus:outline-none focus:border-emerald-500 text-sm">
+                                        <option>Informações sobre Roteiros</option>
+                                        <option>Hospedagem & Alimentação</option>
+                                        <option>Guias Turísticos</option>
+                                        <option>Outros Assuntos</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-2">Mensagem</label>
+                                <textarea rows="4" required placeholder="Como podemos ajudar você?" class="w-full px-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 text-sm resize-none"></textarea>
+                            </div>
+
+                            <button type="submit" class="w-full py-4 rounded-xl bg-brand-600 hover:bg-brand-500 font-bold text-white shadow-lg shadow-brand-600/30 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                <span>Enviar Mensagem</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 text-slate-400 py-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-brand-700 flex items-center justify-center text-white">
+                        <i class="fa-solid fa-tree text-lg"></i>
+                    </div>
+                    <div>
+                        <span class="block text-white font-bold font-serif">Explore Guarapuava</span>
+                        <span class="text-xs text-slate-500">Portal Independente de Divulgação Turística</span>
+                    </div>
+                </div>
+
+                <div class="text-xs text-slate-500 text-center md:text-right">
+                    <p>&copy; 2026 Explore Guarapuava. Todos os direitos reservados.</p>
+                    <p class="mt-1">Desenvolvido com carinho para o fomento do turismo sustentável do Paraná.</p>
+                </div>
+
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal: Spot Details -->
+    <div id="spot-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl relative">
+            <button onclick="closeSpotModal()" class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-slate-900/60 hover:bg-slate-900 text-white flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div id="spot-modal-content"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Lightbox Gallery -->
+    <div id="lightbox-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-slate-950/90 backdrop-blur-md" onclick="closeLightbox()">
+        <div class="max-w-4xl w-full relative" onclick="event.stopPropagation()">
+            <button onclick="closeLightbox()" class="absolute -top-12 right-0 text-white hover:text-emerald-400 text-2xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img id="lightbox-img" src="" alt="Ampliada" class="w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl">
+            <p id="lightbox-caption" class="text-center text-white mt-4 text-sm font-medium"></p>
+        </div>
+    </div>
+
+    <!-- Modal: My Itinerary Drawer -->
+    <div id="itinerary-modal" class="fixed inset-0 z-50 hidden flex justify-end bg-slate-950/60 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md h-full p-6 flex flex-col shadow-2xl">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-bookmark text-brand-600 text-xl"></i>
+                    <h3 class="text-xl font-bold font-serif text-slate-900">Meu Roteiro Salvado</h3>
+                </div>
+                <button onclick="toggleItineraryModal()" class="text-slate-400 hover:text-slate-700 text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="itinerary-list" class="flex-1 overflow-y-auto py-4 space-y-3 custom-scrollbar">
+                <!-- Javascript will insert items -->
+            </div>
+
+            <div class="pt-4 border-t border-slate-200 space-y-3">
+                <button onclick="clearItinerary()" class="w-full py-2.5 rounded-xl border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold transition">
+                    Limpar Roteiro
+                </button>
+                <button onclick="alert('Roteiro pronto! Você pode capturar a tela ou salvar os locais para a sua viagem.')" class="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow transition">
+                    Finalizar Planejamento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        const touristSpots = [
+            {
+                id: 'salto-sao-francisco',
+                title: 'Salto São Francisco',
+                category: 'natureza',
+                badge: 'Maior do Sul',
+                image: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=800&q=80',
+                shortDesc: 'Impressionante queda livre de 196 metros em meio ao Parque Municipal São Francisco da Esperança.',
+                fullDesc: 'O Salto São Francisco é o maior salto do Sul do Brasil e um dos mais expressivos do país. Localizado no Parque Municipal São Francisco da Esperança, oferece mirante estruturado com passarela acessível, trilhas sinalizadas em meio à mata nativa e vista espetacular para o canteiro do vale.',
+                lat: -24.3792,
+                lng: -51.2721,
+                locationText: 'Área Rural (Aproximadamente 45km do Centro)',
+                hours: 'Quarta a Domingo, das 08h às 17h',
+                price: 'Entrada Gratuita'
+            },
+            {
+                id: 'parque-do-lago',
+                title: 'Parque do Lago',
+                category: 'parque',
+                badge: 'Cartão Postal',
+                image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+                shortDesc: 'O coração verde da cidade, famoso pelas cerejeiras em flor no inverno e caminhadas ao entardecer.',
+                fullDesc: 'Localizado próximo ao centro da cidade, o Parque do Lago é o ponto de encontro preferido dos guarapuavanos para caminhadas, piqueniques e práticas esportivas. No inverno, o parque se transforma com a florada espetacular das cerejeiras asiáticas (sakurás).',
+                lat: -25.3951,
+                lng: -51.4688,
+                locationText: 'Rua Pe. Chagas, Bairro Santa Cruz',
+                hours: 'Aberto 24 horas',
+                price: 'Gratuito'
+            },
+            {
+                id: 'parque-das-araucarias',
+                title: 'Parque das Araucárias',
+                category: 'natureza',
+                badge: 'Reserva Ecológica',
+                image: 'https://images.unsplash.com/photo-1511497584788-8767611136f6?auto=format&fit=crop&w=800&q=80',
+                shortDesc: 'Reserva natural preservada com centenas de araucárias, horto florestal e Museu do Produtor.',
+                fullDesc: 'Com mais de 100 hectares de floresta preservada, o Parque das Araucárias abriga exemplares seculares da árvore símbolo do Paraná. Conta com trilhas ecológicas monitoradas, viveiro de mudas nativas e o Museu do Produtor.',
+                lat: -25.3580,
+                lng: -51.4880,
+                locationText: 'BR-277, Km 343',
+                hours: 'Terça a Domingo, das 08h às 17h30',
+                price: 'Gratuito'
+            },
+            {
+                id: 'lago-das-lagrimas',
+                title: 'Lago das Lágrimas',
+                category: 'parque',
+                badge: 'Tranquilidade',
+                image: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=800&q=80',
+                shortDesc: 'Belo parque urbano arborizado no centro, ideal para passeios em família e contemplação.',
+                fullDesc: 'O Lago das Lágrimas é uma área verde charmosa situada na região central de Guarapuava. Possui pista de caminhada, parquinho infantil, pedalinhos e abundante avifauna nativa.',
+                lat: -25.3855,
+                lng: -51.4605,
+                locationText: 'Rua Senador Pinheiro Machado, Centro',
+                hours: 'Aberto diariamente',
+                price: 'Gratuito'
+            },
+            {
+                id: 'catedral-nossa-senhora-de-belem',
+                title: 'Catedral Nossa Senhora de Belém',
+                category: 'historico',
+                badge: 'História Colonial',
+                image: 'https://images.unsplash.com/photo-1548625361-18512140409a?auto=format&fit=crop&w=800&q=80',
+                shortDesc: 'Sede da diocese, marco histórico e religioso do povoamento original da cidade.',
+                fullDesc: 'Fundada no início do século XIX, a Catedral de Nossa Senhora de Belém localiza-se na Praça 9 de Dezembro, centro histórico da cidade. Possui arquitetura neoclássica marcante, belíssimos vitrais e acervo histórico religioso.',
+                lat: -25.3905,
+                lng: -51.4625,
+                locationText: 'Praça 9 de Dezembro, Centro',
+                hours: 'Segunda a Sábado, das 07h às 19h',
+                price: 'Gratuito'
+            },
+            {
+                id: 'museu-visconde-guarapuava',
+                title: 'Museu Visconde de Guarapuava',
+                category: 'historico',
+                badge: 'Patrimônio',
+                image: 'https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=800&q=80',
+                shortDesc: 'Casarão histórico construído no século XIX abrigando vestígios da formação regional.',
+                fullDesc: 'O Museu Municipal Visconde de Guarapuava preserva a história da ocupação dos Campos de Guarapuava, com acervo de mobílias antigas, vestimentas tropeiras, armas da época imperial e documentos históricos.',
+                lat: -25.3890,
+                lng: -51.4640,
+                locationText: 'Rua Visconde de Guarapuava, 288',
+                hours: 'Segunda a Sexta, das 09h às 17h',
+                price: 'Gratuito'
+            }
+        ];
+
+        const galleryData = [
+            { src: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80', category: 'parques', title: 'Pôr do Sol no Parque do Lago' },
+            { src: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1000&q=80', category: 'cachoeiras', title: 'Vista Superior do Salto São Francisco' },
+            { src: 'https://images.unsplash.com/photo-1511497584788-8767611136f6?auto=format&fit=crop&w=1000&q=80', category: 'parques', title: 'Araucárias Centenárias ao Alvorecer' },
+            { src: 'https://images.unsplash.com/photo-1548625361-18512140409a?auto=format&fit=crop&w=1000&q=80', category: 'patrimonio', title: 'Catedral Nossa Senhora de Belém' },
+            { src: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=1000&q=80', category: 'parques', title: 'Espelho d\'Água no Lago das Lágrimas' },
+            { src: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1000&q=80', category: 'parques', title: 'Bosque Nativo dos Campos Gerais' },
+            { src: 'https://images.unsplash.com/photo-1565008447742-97f6f38c985c?auto=format&fit=crop&w=1000&q=80', category: 'patrimonio', title: 'Arquitetura Colonial do Centro Histórico' },
+            { src: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1000&q=80', category: 'cachoeiras', title: 'Canyon e Vegetação de Encosta' }
+        ];
+
+        let itinerary = JSON.parse(localStorage.getItem('guarapuava_itinerary')) || [];
+        let map;
+        let mapMarkers = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSpots('todos');
+            initMap();
+            renderGallery('todos');
+            updateItineraryBadge();
+        });
+
+        // Toggle Mobile Menu Drawer
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Render Tourist Spots Grid
+        function renderSpots(filter) {
+            const container = document.getElementById('spots-grid');
+            container.innerHTML = '';
+
+            const filtered = filter === 'todos' ? touristSpots : touristSpots.filter(s => s.category === filter);
+
+            filtered.forEach(spot => {
+                const isSaved = itinerary.some(item => item.id === spot.id);
+                const card = document.createElement('div');
+                card.className = 'bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col group';
+
+                card.innerHTML = `
+                    <div class="relative overflow-hidden h-52">
+                        <img src="${spot.image}" alt="${spot.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <span class="absolute top-4 left-4 bg-brand-700/90 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full shadow">
+                            ${spot.badge}
+                        </span>
+                        <button onclick="toggleSaveItinerary('${spot.id}')" class="absolute top-4 right-4 w-9 h-9 rounded-full ${isSaved ? 'bg-brand-600 text-white' : 'bg-white/80 hover:bg-white text-slate-700'} backdrop-blur-md flex items-center justify-center transition shadow">
+                            <i class="fa-solid fa-bookmark"></i>
+                        </button>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                            <h3 class="text-xl font-bold font-serif text-slate-900 group-hover:text-brand-600 transition">${spot.title}</h3>
+                            <p class="text-slate-600 text-xs mt-2 leading-relaxed">${spot.shortDesc}</p>
+                        </div>
+                        <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <span class="text-xs text-slate-500 font-medium"><i class="fa-solid fa-location-dot text-brand-600 mr-1"></i> ${spot.locationText.split('(')[0]}</span>
+                            <button onclick="openSpotModal('${spot.id}')" class="text-xs font-bold text-brand-700 hover:text-brand-800 flex items-center gap-1">
+                                Ver Detalhes <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Filter Tourist Spots Handler
+        function filterSpots(category) {
+            document.querySelectorAll('.spot-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-700', 'text-white', 'shadow-md');
+                btn.classList.add('bg-white', 'text-slate-700');
+            });
+            event.target.classList.remove('bg-white', 'text-slate-700');
+            event.target.classList.add('bg-brand-700', 'text-white', 'shadow-md');
+
+            renderSpots(category);
+        }
+
+        function initMap() {
+            // Guarapuava Coordinates
+            map = L.map('map').setView([-25.3908, -51.4628], 11);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            touristSpots.forEach(spot => {
+                const marker = L.marker([spot.lat, spot.lng]).addTo(map);
+                
+                const popupContent = `
+                    <div class="p-2 max-w-xs">
+                        <img src="${spot.image}" class="w-full h-24 object-cover rounded-lg mb-2">
+                        <h4 class="font-bold text-slate-900 text-sm font-serif">${spot.title}</h4>
+                        <p class="text-xs text-slate-600 mb-2">${spot.shortDesc}</p>
+                        <button onclick="openSpotModal('${spot.id}')" class="w-full py-1.5 bg-brand-600 text-white rounded-md text-xs font-bold">
+                            Saiba Mais
+                        </button>
+                    </div>
+                `;
+
+                marker.bindPopup(popupContent);
+                mapMarkers.push(marker);
+            });
+        }
+
+        function openSpotModal(spotId) {
+            const spot = touristSpots.find(s => s.id === spotId);
+            if (!spot) return;
+
+            const isSaved = itinerary.some(item => item.id === spot.id);
+            const content = document.getElementById('spot-modal-content');
+
+            content.innerHTML = `
+                <div class="relative h-64 sm:h-80">
+                    <img src="${spot.image}" alt="${spot.title}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+                    <div class="absolute bottom-6 left-6 right-6 text-white">
+                        <span class="inline-block px-3 py-1 rounded-full bg-brand-600 text-xs font-bold uppercase mb-2">${spot.badge}</span>
+                        <h3 class="text-3xl font-serif font-bold">${spot.title}</h3>
+                    </div>
+                </div>
+                <div class="p-6 sm:p-8 space-y-6">
+                    <p class="text-slate-600 leading-relaxed text-sm">${spot.fullDesc}</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs text-slate-700">
+                        <div>
+                            <span class="block text-slate-400 font-semibold mb-1">Localização:</span>
+                            <span class="font-bold text-slate-800"><i class="fa-solid fa-map-pin text-brand-600 mr-1"></i> ${spot.locationText}</span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 font-semibold mb-1">Horário de Funcionamento:</span>
+                            <span class="font-bold text-slate-800"><i class="fa-solid fa-clock text-brand-600 mr-1"></i> ${spot.hours}</span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 font-semibold mb-1">Ingresso:</span>
+                            <span class="font-bold text-slate-800"><i class="fa-solid fa-ticket text-brand-600 mr-1"></i> ${spot.price}</span>
+                        </div>
+                        <div>
+                            <span class="block text-slate-400 font-semibold mb-1">Coordenadas GPS:</span>
+                            <span class="font-bold text-slate-800">${spot.lat}, ${spot.lng}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button onclick="toggleSaveItinerary('${spot.id}'); openSpotModal('${spot.id}');" class="flex-1 py-3 rounded-xl ${isSaved ? 'bg-slate-200 text-slate-800' : 'bg-brand-600 text-white'} font-bold text-sm shadow transition">
+                            <i class="fa-solid fa-bookmark mr-1"></i> ${isSaved ? 'Remover do Roteiro' : 'Adicionar ao Roteiro'}
+                        </button>
+                        <a href="https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}" target="_blank" class="px-5 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-diamond-turn-right text-brand-600"></i> Como Chegar
+                        </a>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('spot-modal').classList.remove('hidden');
+        }
+
+        function closeSpotModal() {
+            document.getElementById('spot-modal').classList.add('hidden');
+        }
+
+        function renderGallery(filter) {
+            const container = document.getElementById('gallery-grid');
+            container.innerHTML = '';
+
+            const filtered = filter === 'todos' ? galleryData : galleryData.filter(g => g.category === filter);
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'relative rounded-2xl overflow-hidden shadow group cursor-pointer h-60';
+                card.onclick = () => openLightbox(item.src, item.title);
+
+                card.innerHTML = `
+                    <img src="${item.src}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                        <span class="text-white text-xs font-semibold font-serif">${item.title}</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function filterGallery(category) {
+            document.querySelectorAll('.gallery-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-brand-700', 'text-white', 'shadow');
+                btn.classList.add('bg-slate-100', 'text-slate-700');
+            });
+            event.target.classList.remove('bg-slate-100', 'text-slate-700');
+            event.target.classList.add('bg-brand-700', 'text-white', 'shadow');
+
+            renderGallery(category);
+        }
+
+        function openLightbox(src, caption) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox-caption').innerText = caption;
+            document.getElementById('lightbox-modal').classList.remove('hidden');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox-modal').classList.add('hidden');
+        }
+
+        function toggleSaveItinerary(spotId) {
+            const index = itinerary.findIndex(item => item.id === spotId);
+            if (index >= 0) {
+                itinerary.splice(index, 1);
+            } else {
+                const spot = touristSpots.find(s => s.id === spotId);
+                if (spot) itinerary.push(spot);
+            }
+
+            localStorage.setItem('guarapuava_itinerary', JSON.stringify(itinerary));
+            updateItineraryBadge();
+            renderSpots('todos');
+            renderItineraryList();
+        }
+
+        function updateItineraryBadge() {
+            document.getElementById('itinerary-count').innerText = itinerary.length;
+        }
+
+        function toggleItineraryModal() {
+            const drawer = document.getElementById('itinerary-modal');
+            drawer.classList.toggle('hidden');
+            if (!drawer.classList.contains('hidden')) {
+                renderItineraryList();
+            }
+        }
+
+        function renderItineraryList() {
+            const container = document.getElementById('itinerary-list');
+            if (itinerary.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-12 text-slate-400">
+                        <i class="fa-solid fa-bookmark text-4xl mb-3 opacity-40"></i>
+                        <p class="text-xs">Nenhum ponto turístico adicionado ainda.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = itinerary.map(spot => `
+                <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                    <img src="${spot.image}" class="w-14 h-14 object-cover rounded-xl">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-xs text-slate-900 truncate font-serif">${spot.title}</h4>
+                        <p class="text-[10px] text-slate-500 truncate">${spot.locationText}</p>
+                    </div>
+                    <button onclick="toggleSaveItinerary('${spot.id}')" class="text-rose-500 hover:text-rose-700 p-2 text-sm">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function clearItinerary() {
+            itinerary = [];
+            localStorage.setItem('guarapuava_itinerary', JSON.stringify(itinerary));
+            updateItineraryBadge();
+            renderItineraryList();
+            renderSpots('todos');
+        }
+
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            alert('Obrigado pela mensagem! Entraremos em contato com todas as orientações turísticas em breve.');
+            e.target.reset();
+        }
+    </script>
+</body>
+</html>
